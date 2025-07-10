@@ -1,0 +1,37 @@
+{
+  "name": "@dfw/form-validation",
+  "version": "1.0.0",
+  "description": "A comprehensive, enterprise-grade TypeScript form validation library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "ts-node --project tsconfig.node.json FormValidation/Tests/ValidatorTests.ts",
+    "test:watch": "ts-node --project tsconfig.node.json --watch FormValidation/Tests/ValidatorTests.ts",
+    "test:coverage": "nyc ts-node --project tsconfig.node.json FormValidation/Tests/ValidatorTests.ts",
+    "dev": "vite",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "typescript",
+    "form-validation",
+    "validation",
+    "inversify",
+    "dependency-injection"
+  ],
+  "author": "DFW Team",
+  "license": "BSD-3-Clause AND CC-BY-SA-4.0",
+  "dependencies": {
+    "inversify": "^7.0.0-alpha.5",
+    "reflect-metadata": "^0.2.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "nyc": "^15.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.4"
+  }
+}

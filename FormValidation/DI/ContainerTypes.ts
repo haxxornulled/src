@@ -1,0 +1,26 @@
+
+export const ContainerTypes = {
+  MessageBroker: Symbol.for("MessageBroker"),
+  MessageFilterRegistry: Symbol.for("MessageFilterRegistry"),
+  FormValidationService: Symbol.for("FormValidationService"),
+  RealTimeValidationService: Symbol.for("RealTimeValidationService"),
+  ValidationManager: Symbol.for("ValidationManager"),
+  TransportProviderRegistry: Symbol.for("TransportProviderRegistry"),
+  TransportProviderName: Symbol.for("TransportProviderName"),
+  EchoLoggerComponent: Symbol.for("EchoLoggerComponent"),
+  RuleParser: Symbol.for("RuleParser"),
+  FormParsingService: Symbol.for("FormParsingService"),
+  ValidatorRegistry: Symbol.for("ValidatorRegistry"),
+  HttpClientFactory: Symbol.for("HttpClientFactory"),
+  DynamicFormSchemaService: Symbol.for("DynamicFormSchemaService"),
+  WebSocketTransportProvider: Symbol.for("WebSocketTransportProvider"),
+  FormEventBinder: Symbol.for("FormEventBinder"),
+  ValidatorDispatcher: Symbol.for("ValidatorDispatcher"),
+  HttpTransportProvider: Symbol.for("HttpTransportProvider"),
+  WebSocketTransport: Symbol.for("WebSocketTransport"),
+  RequiredValidator: Symbol.for("RequiredValidator"),
+  EmailValidator: Symbol.for("EmailValidator"),
+  FormLoggerComponent: Symbol.for("FormLoggerComponent"),
+  FormValidationMiddleware: Symbol.for("FormValidationMiddleware"),
+};
+export default ContainerTypes;

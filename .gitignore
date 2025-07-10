@@ -1,0 +1,7 @@
+# Ignore all appsettings.json files
+appsettings.json
+**/appsettings.json
+
+# Ignore all bin directories
+bin/
+**/bin/ 
