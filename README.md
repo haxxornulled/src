@@ -2,7 +2,7 @@
 
 ## 🚀 Overview
 
-A modern, extensible, and production-ready form validation system for web applications. Supports local and remote (HTTP) validation, field-level configuration, dependency injection, and easy integration with any backend API.
+A modern, extensible, and "maybe", production-ready form validation system for web applications. Supports local and remote (HTTP) validation, field-level configuration, dependency injection, and easy integration with any backend API.
 
 - **HTTP-only:** All remote validation uses HTTP for maximum compatibility and simplicity.
 - **Configurable:** Global and per-field endpoints, headers, and timeouts.
