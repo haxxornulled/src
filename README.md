@@ -135,6 +135,4 @@ A: Use the built-in debug mode (`enableDebug: true`) and browser dev tools.
 
 ---
 
-## 📄 License
 
-MIT 
