@@ -5,11 +5,11 @@ FormValidationV1 is a comprehensive, event-driven form validation system built w
 ## System Architecture
 
 ```mermaid
-graph TD;
-  A[Form (HTML)] -->|Events| B(FormEventBinder)
+graph TD
+  A[Form HTML] -->|Events| B[FormEventBinder]
   B -->|Messages| C[MessageBroker]
   C -->|Middleware| D[FormValidationMiddleware]
-  D -->|Dispatch| E(ValidatorDispatcher)
+  D -->|Dispatch| E[ValidatorDispatcher]
   E -->|Registry Lookup| F[ValidatorRegistry]
   F -->|Local| G[Local Validators]
   F -->|Remote| H[RemoteValidator]
