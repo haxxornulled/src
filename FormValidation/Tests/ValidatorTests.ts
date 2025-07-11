@@ -272,6 +272,105 @@ testRunner.describe('LengthValidators', () => {
   });
 });
 
+testRunner.describe('PatternValidator', () => {
+  let validator: any;
+  testRunner.it('should validate matching pattern', () => {
+    validator = new (require('../Validators/PatternValidator').PatternValidator)();
+    testRunner.expect(validator.validate('abc123', { type: 'pattern', value: '^abc\\d+$' }).valid).toBe(true);
+    testRunner.expect(validator.validate('xyz', { type: 'pattern', value: '^abc\\d+$' }).valid).toBe(false);
+  });
+  testRunner.it('should handle empty pattern', () => {
+    validator = new (require('../Validators/PatternValidator').PatternValidator)();
+    testRunner.expect(validator.validate('anything', { type: 'pattern', value: '' }).valid).toBe(true);
+  });
+});
+
+testRunner.describe('MatchValidator', () => {
+  let validator: any;
+  testRunner.it('should validate matching fields', () => {
+    validator = new (require('../Validators/MatchValidator').MatchValidator)();
+    const allValues = { password: 'abc123', confirmPassword: 'abc123' };
+    testRunner.expect(validator.validate('abc123', { type: 'match', value: 'password' }, allValues).valid).toBe(true);
+    testRunner.expect(validator.validate('wrong', { type: 'match', value: 'password' }, allValues).valid).toBe(false);
+  });
+  testRunner.it('should handle missing field to match', () => {
+    validator = new (require('../Validators/MatchValidator').MatchValidator)();
+    const allValues = { confirmPassword: 'abc123' };
+    const result = validator.validate('abc123', { type: 'match', value: 'password' }, allValues);
+    testRunner.expect(result.valid).toBe(false);
+    testRunner.expect(result.message).toContain('No field to match');
+  });
+  testRunner.it('should handle empty rule value', () => {
+    validator = new (require('../Validators/MatchValidator').MatchValidator)();
+    const allValues = { password: 'abc123', confirmPassword: 'abc123' };
+    const result = validator.validate('abc123', { type: 'match', value: '' }, allValues);
+    testRunner.expect(result.valid).toBe(false);
+  });
+});
+
+testRunner.describe('MinCheckedValidator', () => {
+  let validator: any;
+  testRunner.it('should validate minimum checked', () => {
+    validator = new (require('../Validators/MinCheckedValidator').MinCheckedValidator)();
+    testRunner.expect(validator.validate(['a', 'b'], { type: 'minchecked', value: 2 }).valid).toBe(true);
+    testRunner.expect(validator.validate(['a'], { type: 'minchecked', value: 2 }).valid).toBe(false);
+  });
+  testRunner.it('should handle empty array', () => {
+    validator = new (require('../Validators/MinCheckedValidator').MinCheckedValidator)();
+    testRunner.expect(validator.validate([], { type: 'minchecked', value: 1 }).valid).toBe(false);
+  });
+});
+
+testRunner.describe('MaxCheckedValidator', () => {
+  let validator: any;
+  testRunner.it('should validate maximum checked', () => {
+    validator = new (require('../Validators/MaxCheckedValidator').MaxCheckedValidator)();
+    testRunner.expect(validator.validate(['a'], { type: 'maxchecked', value: 2 }).valid).toBe(true);
+    testRunner.expect(validator.validate(['a', 'b', 'c'], { type: 'maxchecked', value: 2 }).valid).toBe(false);
+  });
+  testRunner.it('should handle empty array', () => {
+    validator = new (require('../Validators/MaxCheckedValidator').MaxCheckedValidator)();
+    testRunner.expect(validator.validate([], { type: 'maxchecked', value: 1 }).valid).toBe(true);
+  });
+});
+
+testRunner.describe('MinSelectedValidator', () => {
+  let validator: any;
+  testRunner.it('should validate minimum selected', () => {
+    validator = new (require('../Validators/MinSelectedValidator').MinSelectedValidator)();
+    testRunner.expect(validator.validate(['a', 'b'], { type: 'minselected', value: 2 }).valid).toBe(true);
+    testRunner.expect(validator.validate(['a'], { type: 'minselected', value: 2 }).valid).toBe(false);
+  });
+  testRunner.it('should handle empty array', () => {
+    validator = new (require('../Validators/MinSelectedValidator').MinSelectedValidator)();
+    testRunner.expect(validator.validate([], { type: 'minselected', value: 1 }).valid).toBe(false);
+  });
+});
+
+testRunner.describe('MaxSelectedValidator', () => {
+  let validator: any;
+  testRunner.it('should validate maximum selected', () => {
+    validator = new (require('../Validators/MaxSelectedValidator').MaxSelectedValidator)();
+    testRunner.expect(validator.validate(['a'], { type: 'maxselected', value: 2 }).valid).toBe(true);
+    testRunner.expect(validator.validate(['a', 'b', 'c'], { type: 'maxselected', value: 2 }).valid).toBe(false);
+  });
+  testRunner.it('should handle empty array', () => {
+    validator = new (require('../Validators/MaxSelectedValidator').MaxSelectedValidator)();
+    testRunner.expect(validator.validate([], { type: 'maxselected', value: 1 }).valid).toBe(true);
+  });
+});
+
+testRunner.describe('RemoteValidator', () => {
+  let validator: any;
+  testRunner.it('should handle missing transport gracefully', async () => {
+    // Simulate missing transport provider
+    validator = new (require('../Validators/RemoteValidator').RemoteValidator)(null, null);
+    const result = await validator.validate('test', { type: 'remote', value: true });
+    testRunner.expect(result.valid).toBe(false);
+  });
+  // Add more tests for actual HTTP mocking if needed
+});
+
 // ============================================================================
 // ERROR HANDLER TESTS
 // ============================================================================

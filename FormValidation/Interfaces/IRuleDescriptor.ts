@@ -12,6 +12,8 @@ export interface IRuleDescriptor {
   endpoint?: string;
   /** Error message override */
   message?: string;
+  /** Field name for configuration lookup */
+  fieldName?: string;
   /** [Anything else for custom rule data] */
   [key: string]: any;
 }

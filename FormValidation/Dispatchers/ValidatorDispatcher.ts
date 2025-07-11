@@ -152,32 +152,37 @@ export class ValidatorDispatcher implements IValidatorDispatcher {
     for (const attr of Array.from(fieldEl.attributes)) {
       if (attr.name.startsWith("data-rule-")) {
         const ruleType = attr.name.replace("data-rule-", "");
-        let param: any = attr.value;
+        let value: any = attr.value;
         
         // Convert string values to appropriate types
-        if (param === "true") param = true;
-        if (param === "false") param = false;
-        if (!isNaN(Number(param)) && param !== "") param = Number(param);
+        if (value === "true") value = true;
+        if (value === "false") value = false;
+        if (!isNaN(Number(value)) && value !== "") value = Number(value);
+
+        // Look for per-rule custom message
+        const msgAttr = `data-msg-${ruleType.toLowerCase()}`;
+        const msg = fieldEl.getAttribute(msgAttr) || undefined;
         
         // Handle special cases
         if (ruleType === "remote") {
           const provider = fieldEl.getAttribute("data-rule-remote-provider");
           const endpoint = fieldEl.getAttribute("data-rule-remote-endpoint");
           const remoteType = fieldEl.getAttribute("data-rule-remote-type");
-          
           rules.push({
             type: ruleType,
-            param,
+            value,
             provider,
             endpoint,
             remoteType,
-            message: fieldEl.getAttribute("data-rule-message") || undefined,
+            fieldName: fieldEl.getAttribute("name") || undefined,
+            message: msg
           });
         } else {
           rules.push({
             type: ruleType,
-            param,
-            message: fieldEl.getAttribute("data-rule-message") || undefined,
+            value,
+            fieldName: fieldEl.getAttribute("name") || undefined,
+            message: msg
           });
         }
       }
@@ -185,20 +190,22 @@ export class ValidatorDispatcher implements IValidatorDispatcher {
     
     // Also check for HTML5 validation attributes
     if (fieldEl.hasAttribute("required")) {
+      const msg = fieldEl.getAttribute("data-msg-required") || "This field is required.";
       rules.push({
         type: "required",
-        param: true,
-        message: fieldEl.getAttribute("data-rule-message") || "This field is required.",
+        value: true,
+        message: msg,
       });
     }
     
     if (fieldEl.hasAttribute("minlength")) {
       const minLength = fieldEl.getAttribute("minlength");
       if (minLength) {
+        const msg = fieldEl.getAttribute("data-msg-minlength") || `Minimum length is ${minLength} characters.`;
         rules.push({
           type: "minlength",
-          param: parseInt(minLength),
-          message: fieldEl.getAttribute("data-rule-message") || `Minimum length is ${minLength} characters.`,
+          value: parseInt(minLength),
+          message: msg,
         });
       }
     }
@@ -206,10 +213,11 @@ export class ValidatorDispatcher implements IValidatorDispatcher {
     if (fieldEl.hasAttribute("maxlength")) {
       const maxLength = fieldEl.getAttribute("maxlength");
       if (maxLength) {
+        const msg = fieldEl.getAttribute("data-msg-maxlength") || `Maximum length is ${maxLength} characters.`;
         rules.push({
           type: "maxlength",
-          param: parseInt(maxLength),
-          message: fieldEl.getAttribute("data-rule-message") || `Maximum length is ${maxLength} characters.`,
+          value: parseInt(maxLength),
+          message: msg,
         });
       }
     }
@@ -217,20 +225,22 @@ export class ValidatorDispatcher implements IValidatorDispatcher {
     if (fieldEl.hasAttribute("pattern")) {
       const pattern = fieldEl.getAttribute("pattern");
       if (pattern) {
+        const msg = fieldEl.getAttribute("data-msg-pattern") || "Value does not match required pattern.";
         rules.push({
           type: "pattern",
-          param: pattern,
-          message: fieldEl.getAttribute("data-rule-message") || "Value does not match required pattern.",
+          value: pattern,
+          message: msg,
         });
       }
     }
     
     // Handle email type
     if (fieldEl instanceof HTMLInputElement && fieldEl.type === "email") {
+      const msg = fieldEl.getAttribute("data-msg-email") || "Please enter a valid email address.";
       rules.push({
         type: "email",
-        param: true,
-        message: fieldEl.getAttribute("data-rule-message") || "Please enter a valid email address.",
+        value: true,
+        message: msg,
       });
     }
     
@@ -253,6 +263,7 @@ export class ValidatorDispatcher implements IValidatorDispatcher {
       endpoint: rule.endpoint,
       provider: rule.provider,
       remoteType,
+      fieldName: rule.fieldName, // Pass field name for configuration lookup
       ...rule,
     };
     try {
@@ -313,7 +324,12 @@ export class ValidatorDispatcher implements IValidatorDispatcher {
           const validator = this.validatorRegistry.getValidator(rule.type);
           if (validator) {
             try {
-              const validationResult = await Promise.resolve(validator.validate(values[field.name], rule, values));
+              // Ensure the rule has the field name for configuration lookup
+              const ruleWithFieldName = {
+                ...rule,
+                fieldName: field.name
+              };
+              const validationResult = await Promise.resolve(validator.validate(values[field.name], ruleWithFieldName, values));
               const res = typeof validationResult === "boolean" ? { valid: validationResult } : validationResult;
               
               if (res && typeof res === "object" && res.valid === false) {

@@ -48,11 +48,26 @@ export class RuleParser implements IRuleParser {
     const input = el as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
     // ---- HTML5 rules ----
-    if ('required' in input && input.required) rules.push({ type: "required" });
-    if ('minLength' in input && input.minLength > 0) rules.push({ type: "minLength", value: input.minLength });
-    if ('maxLength' in input && input.maxLength > 0) rules.push({ type: "maxLength", value: input.maxLength });
-    if ('pattern' in input && input.pattern) rules.push({ type: "pattern", value: input.pattern });
-    if ('type' in input && input.type === "email") rules.push({ type: "email" });
+    if ('required' in input && input.required) {
+      const msg = el.getAttribute('data-msg-required');
+      rules.push({ type: "required", message: msg || undefined });
+    }
+    if ('minLength' in input && input.minLength > 0) {
+      const msg = el.getAttribute('data-msg-minlength');
+      rules.push({ type: "minLength", value: input.minLength, message: msg || undefined });
+    }
+    if ('maxLength' in input && input.maxLength > 0) {
+      const msg = el.getAttribute('data-msg-maxlength');
+      rules.push({ type: "maxLength", value: input.maxLength, message: msg || undefined });
+    }
+    if ('pattern' in input && input.pattern) {
+      const msg = el.getAttribute('data-msg-pattern');
+      rules.push({ type: "pattern", value: input.pattern, message: msg || undefined });
+    }
+    if ('type' in input && input.type === "email") {
+      const msg = el.getAttribute('data-msg-email');
+      rules.push({ type: "email", message: msg || undefined });
+    }
 
     // ---- Data attribute rules ----
     Array.from(el.attributes).forEach(attr => {
@@ -62,19 +77,23 @@ export class RuleParser implements IRuleParser {
       // Skip remote (handled below)
       if (["remote", "remote-provider", "remote-endpoint"].includes(ruleKey)) return;
 
-      if (ruleKey === "minchecked") rules.push({ type: "minChecked", value: +attr.value });
-      else if (ruleKey === "minselected") rules.push({ type: "minSelected", value: +attr.value });
+      const msgAttr = `data-msg-${ruleKey}`;
+      const msg = el.getAttribute(msgAttr);
+
+      if (ruleKey === "minchecked") rules.push({ type: "minChecked", value: +attr.value, message: msg || undefined });
+      else if (ruleKey === "minselected") rules.push({ type: "minSelected", value: +attr.value, message: msg || undefined });
       else if (ruleKey === "match") {
         // Support data-match-field as a secondary way to specify the field to match
         const matchField = el.getAttribute("data-match-field");
         rules.push({
           type: "match",
           value: attr.value,
-          ...(matchField ? { matchField } : {})
+          ...(matchField ? { matchField } : {}),
+          message: msg || undefined
         });
       }
       // Catch-all for anything else
-      else rules.push({ type: ruleKey, value: attr.value });
+      else rules.push({ type: ruleKey, value: attr.value, message: msg || undefined });
     });
 
     // ---- Remote validation rule ----
@@ -82,11 +101,13 @@ export class RuleParser implements IRuleParser {
     const provider = el.getAttribute("data-rule-remote-provider");
     const endpoint = el.getAttribute("data-rule-remote-endpoint");
     if (remoteType && (provider || endpoint)) {
+      const msg = el.getAttribute('data-msg-remote');
       rules.push({
         type: "remote",
         remoteType,
         provider: provider || undefined,
-        endpoint: endpoint || undefined
+        endpoint: endpoint || undefined,
+        message: msg || undefined
       });
     }
 

@@ -24,12 +24,15 @@ export class FormDebugger {
   public debugFormDetection(): void {
     console.log('🔍 [FormDebugger] Starting form detection debug...');
     
-    // Check for forms with validate="true"
-    const validateForms = Array.from(document.querySelectorAll<HTMLFormElement>('form[validate="true"]'));
-    console.log(`📋 [FormDebugger] Found ${validateForms.length} forms with validate="true":`, validateForms.map(f => ({ id: f.id, name: f.name })));
+    // Check for all forms first
+    const allForms = Array.from(document.querySelectorAll<HTMLFormElement>('form'));
+    console.log(`📋 [FormDebugger] Total forms found: ${allForms.length}`);
+    
+    // Check for forms with validate attribute
+    const validateForms = Array.from(document.querySelectorAll<HTMLFormElement>('form[validate]'));
+    console.log(`📋 [FormDebugger] Found ${validateForms.length} forms with validate attribute:`, validateForms.map(f => ({ id: f.id, name: f.name })));
     
     // Check for forms with data-rule attributes
-    const allForms = Array.from(document.querySelectorAll<HTMLFormElement>('form'));
     const formsWithRules = allForms.filter(form => {
       const fieldsWithRules = Array.from(form.elements).filter(el => 
         el instanceof HTMLElement && 
@@ -49,6 +52,7 @@ export class FormDebugger {
         method: form.method,
         hasValidateAttr: form.hasAttribute('validate'),
         validateValue: form.getAttribute('validate'),
+        attributes: Array.from(form.attributes).map(attr => `${attr.name}="${attr.value}"`).join(', '),
         fields: this.getFormFieldsInfo(form)
       });
     });

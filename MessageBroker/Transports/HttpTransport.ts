@@ -1,12 +1,14 @@
 import { IMessage } from "../Interfaces/IMessage";
 import { ITransportProvider } from "../Interfaces/ITransportProvider";
+import { injectable, unmanaged } from "inversify";
 
+@injectable()
 export class HttpTransport implements ITransportProvider {
   public readonly name = "HttpTransport";
   public readonly endpoint: string;
   public readonly readyState = 1; // Always "open" for HTTP
 
-  constructor(endpoint?: string) {
+  constructor(@unmanaged() endpoint?: string) {
     // Can be set via constructor, or provided per-request
     this.endpoint = endpoint || "/api/message"; // Default fallback, change as needed
   }

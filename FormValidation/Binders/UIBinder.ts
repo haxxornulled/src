@@ -58,15 +58,28 @@ export class UIBinder {
     // Support for field names with [] for array fields (checkbox groups)
     const baseField = field.replace(/\[\]$/, "");
 
+    // First try to find elements with data-valmsg-for (standard approach)
     if (formId) {
       const form = document.getElementById(formId);
-      if (form) return form.querySelector(`[data-valmsg-for="${baseField}"]`);
+      if (form) {
+        const valmsgEl = form.querySelector(`[data-valmsg-for="${baseField}"]`);
+        if (valmsgEl) return valmsgEl;
+      }
     }
     if (formName) {
       const form = document.querySelector(`form[name="${formName}"]`);
-      if (form) return form.querySelector(`[data-valmsg-for="${baseField}"]`);
+      if (form) {
+        const valmsgEl = form.querySelector(`[data-valmsg-for="${baseField}"]`);
+        if (valmsgEl) return valmsgEl;
+      }
     }
-    return document.querySelector(`[data-valmsg-for="${baseField}"]`);
+    
+    // Fallback: Look for elements with id pattern like "fieldname-error" or "fieldname-success"
+    const errorEl = document.getElementById(`${baseField}-error`);
+    const successEl = document.getElementById(`${baseField}-success`);
+    
+    // Return error element if it exists, otherwise success element
+    return errorEl || successEl;
   }
 
   showFieldMessage(
@@ -74,31 +87,98 @@ export class UIBinder {
     message: string,
     level: "info" | "success" | "error"
   ) {
-    el.innerHTML = `<span class="toast toast-${level}" aria-live="polite">${message}</span>`;
-    el.setAttribute("role", "alert");
-    el.setAttribute("aria-live", "polite");
-    el.setAttribute("aria-atomic", "true");
-    el.setAttribute("data-valmsg-active", level);
-
-    // Only auto-fade for non-errors (success/info)
-    if (level !== "error") {
-      void (el as HTMLElement).offsetWidth; // Force reflow to retrigger animation
-      el.classList.add("fade-out-toast");
-      el.addEventListener(
-        "animationend",
-        () => this.clearField(el),
-        { once: true }
-      );
+    // Get the field name from the element id (e.g., "email-error" -> "email")
+    const fieldName = el.id?.replace(/-error$|-success$/, '');
+    
+    if (!fieldName) {
+      // Fallback to original behavior
+      el.innerHTML = `<span class="toast toast-${level}" aria-live="polite">${message}</span>`;
+      el.setAttribute("role", "alert");
+      el.setAttribute("aria-live", "polite");
+      el.setAttribute("aria-atomic", "true");
+      el.setAttribute("data-valmsg-active", level);
+      return;
+    }
+    
+    // Find the corresponding error and success elements
+    const errorEl = document.getElementById(`${fieldName}-error`);
+    const successEl = document.getElementById(`${fieldName}-success`);
+    const fieldEl = document.querySelector(`[name="${fieldName}"]`) as HTMLElement;
+    
+    // Clear both containers first
+    if (errorEl) {
+      errorEl.innerHTML = '';
+      errorEl.style.display = 'none';
+    }
+    if (successEl) {
+      successEl.innerHTML = '';
+      successEl.style.display = 'none';
+    }
+    
+    // Show message in appropriate container
+    if (level === 'error' && errorEl) {
+      errorEl.innerHTML = message;
+      errorEl.style.display = 'block';
+      errorEl.setAttribute("role", "alert");
+      errorEl.setAttribute("aria-live", "polite");
+      
+      // Add error class to field
+      if (fieldEl) {
+        fieldEl.classList.add('validation-error');
+        fieldEl.classList.remove('validation-success');
+      }
+    } else if (level === 'success' && successEl) {
+      successEl.innerHTML = message;
+      successEl.style.display = 'block';
+      successEl.setAttribute("role", "alert");
+      successEl.setAttribute("aria-live", "polite");
+      
+      // Add success class to field
+      if (fieldEl) {
+        fieldEl.classList.add('validation-success');
+        fieldEl.classList.remove('validation-error');
+      }
     }
   }
 
   clearField(el: Element) {
-    el.innerHTML = "";
-    el.removeAttribute("role");
-    el.removeAttribute("aria-live");
-    el.removeAttribute("aria-atomic");
-    el.removeAttribute("data-valmsg-active");
-    el.classList.remove("fade-out-toast");
+    // Get the field name from the element id (e.g., "email-error" -> "email")
+    const fieldName = el.id?.replace(/-error$|-success$/, '');
+    
+    if (!fieldName) {
+      // Fallback to original behavior
+      el.innerHTML = "";
+      el.removeAttribute("role");
+      el.removeAttribute("aria-live");
+      el.removeAttribute("aria-atomic");
+      el.removeAttribute("data-valmsg-active");
+      el.classList.remove("fade-out-toast");
+      return;
+    }
+    
+    // Clear both error and success containers
+    const errorEl = document.getElementById(`${fieldName}-error`);
+    const successEl = document.getElementById(`${fieldName}-success`);
+    const fieldEl = document.querySelector(`[name="${fieldName}"]`) as HTMLElement;
+    
+    if (errorEl) {
+      errorEl.innerHTML = '';
+      errorEl.style.display = 'none';
+      errorEl.removeAttribute("role");
+      errorEl.removeAttribute("aria-live");
+    }
+    
+    if (successEl) {
+      successEl.innerHTML = '';
+      successEl.style.display = 'none';
+      successEl.removeAttribute("role");
+      successEl.removeAttribute("aria-live");
+    }
+    
+    // Remove validation classes from field
+    if (fieldEl) {
+      fieldEl.classList.remove('validation-error', 'validation-success');
+    }
   }
 }
 

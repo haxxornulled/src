@@ -12,15 +12,15 @@ export class FormValidationMiddleware implements IFormValidationMiddleware {
   private label: string = "FormValidation";
   
   constructor(
-    @inject("IFormEventBinder") private formEventBinder: IFormEventBinder
+    @inject(ContainerTypes.FormEventBinder) private formEventBinder: IFormEventBinder
   ) {}
 
   /** Scan and bind all forms marked for validation */
   attachToForms(): void {
-    const forms = Array.from(document.querySelectorAll<HTMLFormElement>('form[validate="true"]'));
+    const forms = Array.from(document.querySelectorAll<HTMLFormElement>('form[validate]'));
     console.log(`[${this.label}] Attaching to ${forms.length} forms for validation.`);
     if (forms.length === 0) {
-      console.warn(`[${this.label}] No forms found with 'validate="true"'.`);
+      console.warn(`[${this.label}] No forms found with 'validate' attribute.`);
       return;
     }
     forms.forEach(form => this.formEventBinder.bind(form));

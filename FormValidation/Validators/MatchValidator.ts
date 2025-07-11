@@ -7,15 +7,19 @@ export class MatchValidator implements IValidator {
     name = "match";
     validate(value: any, rule: IRuleDescriptor, allValues?: Record<string, any>): IValidationResult {
         // Prefer matchField, then value
-        const otherField = (rule as any).matchField || rule.value;
-        console.log("MatchValidator allValues:", allValues, "otherField:", otherField, "allValues[otherField]:", allValues ? allValues[otherField] : undefined);
+        let otherField = (rule as any).matchField || rule.value;
+        if (typeof otherField === 'string' && otherField.trim() === '') {
+            otherField = undefined;
+        }
         if (!otherField) {
+            console.warn('[MatchValidator] No field to match specified in rule:', rule);
             return {
                 valid: false,
                 message: rule.message || "No field to match specified."
             };
         }
         if (!allValues || !(otherField in allValues)) {
+            console.warn(`[MatchValidator] Field to match (${otherField}) not found in allValues:`, allValues);
             return {
                 valid: false,
                 message: rule.message || `Field to match (${otherField}) not found.`

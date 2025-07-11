@@ -132,6 +132,7 @@ export class FormEventBinder implements IFormEventBinder {
         remoteType: field.getAttribute("data-rule-remote"),
         provider: field.getAttribute("data-rule-remote-provider"),
         endpoint: field.getAttribute("data-rule-remote-endpoint"),
+        fieldName: field.name, // Add field name for configuration lookup
         allValues,
       },
       _remote: false,
@@ -217,8 +218,13 @@ export class FormEventBinder implements IFormEventBinder {
     Array.from(form.elements)
       .filter(this.isBindableField)
       .forEach((el: any) => {
-        if (el.name) values[el.name] = this.getFieldValue(el);
+        const value = this.getFieldValue(el);
+        // Map by name
+        if (el.name) values[el.name] = value;
+        // Map by id if present and different from name
+        if (el.id && el.id !== el.name) values[el.id] = value;
       });
+    // This ensures validators can reference fields by either name or id
     return values;
   }
 
